@@ -1,25 +1,71 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react"
+import "./App.css" // Added some styling
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends React.Component {
+  state = {
+    url: "",
+    result: {}
+  }
+
+  genRows = obj => {
+    return Object.keys(obj).map(key => {
+      return (
+        <tr key={key}>
+          <td>{key}</td>
+          <td>{obj[key]}</td>
+        </tr>
+      )
+    })
+  }
+
+  submitHandler = e => {
+    e.preventDefault()
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accepts: "application/json",
+      },
+      body: JSON.stringify({
+        url: this.state.url,
+      }),
+    }
+    fetch("https://wordcounterbackend.herokuapp.com/", options)
+      .then(res => res.json())
+      .then(data => {
+        this.setState({ result: data, url: "" })
+      })
+  }
+
+  render() {
+    return (
+      <>
+        <h1>Word Counter</h1>
+        <form onSubmit={e => this.submitHandler(e)}>
+          <label>
+            URL:
+          <input
+              type="url"
+              name="url"
+              onChange={e => this.setState({ url: e.target.value })}
+              value={this.state.url} />
+          </label>
+          <input type="submit" value="Submit" />
+        </form>
+        <table>
+          <thead>
+            <tr>
+              <th>Word</th>
+              <th>Count</th>
+            </tr>
+          </thead>
+          <tbody>
+              {this.genRows(this.state.result)}
+          </tbody>
+        </table>
+      </>
+    )
+  }
 }
 
-export default App;
+export default App
